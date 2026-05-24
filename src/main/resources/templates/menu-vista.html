@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Gerencial - Restaurante</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
+
+    <style>
+        body { background-color: #0a0a0a; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-admin { background-color: #1a1a1a; border-bottom: 2px solid #ff9f1c; }
+        .btn-brand { background-color: #ff9f1c; color: #fff; font-weight: bold; border: none; }
+        .btn-brand:hover { background-color: #e88d14; color: #fff; }
+
+        /* Estilos del Carrusel Premium */
+        .carousel-item-container { display: flex; justify-content: center; align-items: center; min-height: 400px; }
+        .food-card { background-color: #1a1a1a; border: 1px solid #333; border-radius: 15px; overflow: hidden; width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .food-card img { width: 100%; height: 250px; object-fit: cover; border-bottom: 2px solid #ff9f1c; }
+        .food-card .card-body { padding: 25px; }
+        .price-tag { color: #ff9f1c; font-size: 1.5rem; font-weight: bold; }
+        .carousel-control-prev-icon, .carousel-control-next-icon { background-color: #ff9f1c; border-radius: 50%; padding: 20px; }
+
+        /* Estilo del Modal Dark */
+        .modal-content { background-color: #1a1a1a; color: #fff; border: 1px solid #444; }
+        .form-control, .form-select { background-color: #2a2a2a; color: #fff; border: 1px solid #444; }
+        .form-control:focus, .form-select:focus { background-color: #333; color: #fff; border-color: #ff9f1c; box-shadow: none; }
+        .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 150px; overflow-y: auto; padding-right: 10px;}
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark navbar-admin py-3 mb-5">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#"><i class="bi bi-shop me-2"></i>Gestión del Menú</a>
+        <div class="d-flex text-white align-items-center">
+            <span><i class="bi bi-person-circle fs-5 me-2"></i><strong th:text="${nombreGerente}">Gerente</strong></span>
+        </div>
+    </div>
+</nav>
+
+<div class="container text-center">
+
+    <div class="d-flex justify-content-center gap-3 mb-4">
+        <button class="btn btn-brand btn-lg px-5 rounded-pill" onclick="abrirModalFormulario()">
+            <i class="bi bi-plus-circle me-2"></i> Añadir Nuevo Plato
+        </button>
+    </div>
+
+    <h4 th:if="${#lists.isEmpty(alimentos)}" class="text-muted mt-5">El menú está vacío. Añade un plato para comenzar.</h4>
+
+    <div th:unless="${#lists.isEmpty(alimentos)}">
+
+        <div class="row justify-content-center mb-4">
+            <div class="col-md-6">
+                <div class="input-group shadow-sm">
+                    <span class="input-group-text bg-dark text-warning border-secondary"><i class="bi bi-search"></i></span>
+                    <select class="form-select bg-dark text-white border-secondary" onchange="if(this.value) verDetalleReceta(this.value); this.value='';">
+                        <option value="">Búsqueda rápida: Selecciona un plato para ver detalles...</option>
+                        <option th:each="alimento : ${alimentos}" th:value="${alimento.nombre}" th:text="${alimento.nombre}"></option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="carruselComidas" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                <div th:each="alimento, iterStat : ${alimentos}"
+                     class="carousel-item"
+                     th:classappend="${iterStat.index == 0} ? 'active' : ''">
+
+                    <div class="carousel-item-container pb-5">
+                        <div class="food-card">
+                            <img th:src="@{'/img/' + ${alimento.nombre} + '.jpg'}"
+                                 onerror="this.onerror=null; this.src='/img/default.jpg';"
+                                 alt="Comida">
+                            <div class="card-body">
+                                <h3 class="fw-bold mb-2" th:text="${alimento.nombre}">Nombre</h3>
+                                <p class="price-tag mb-4" th:text="'$' + ${alimento.precio}">$0.00</p>
+
+                                <div class="d-flex justify-content-center gap-2">
+                                    <button class="btn btn-outline-info" title="Ver Receta"
+                                            th:data-nombre="${alimento.nombre}" onclick="verDetalleReceta(this.getAttribute('data-nombre'))">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+
+                                    <button class="btn btn-outline-primary" title="Editar Plato"
+                                            th:data-id="${alimento.id}"
+                                            th:data-nombre="${alimento.nombre}"
+                                            th:data-precio="${alimento.precio}"
+                                            onclick="abrirModalFormulario(this)">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+
+                                    <a class="btn btn-outline-danger" title="Eliminar"
+                                       th:href="@{/menu/eliminar/{id}(id=${alimento.id})}"
+                                       onclick="return confirm('¿Seguro que deseas eliminar este plato de forma permanente?');">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="carousel-control-prev" type="button" data-bs-target="#carruselComidas" data-bs-slide="prev" th:if="${alimentos.size() > 1}">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carruselComidas" data-bs-slide="next" th:if="${alimentos.size() > 1}">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalPlato" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold text-warning" id="tituloModal">Nuevo Plato Completo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form th:action="@{/menu/guardar}" method="POST" enctype="multipart/form-data">
+                <div class="modal-body text-start">
+                    <input type="hidden" id="inputId" name="id">
+
+                    <div class="row mb-3">
+                        <div class="col-8">
+                            <label class="form-label text-muted small mb-1">Nombre de la comida</label>
+                            <input type="text" class="form-control" id="inputNombre" name="nombre" required>
+                        </div>
+                        <div class="col-4">
+                            <label class="form-label text-muted small mb-1">Precio ($)</label>
+                            <input type="number" step="0.01" class="form-control" id="inputPrecio" name="precio" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-muted small mb-1"><i class="bi bi-camera me-1"></i>Foto del Plato</label>
+                        <input type="file" class="form-control" name="imagen" accept="image/*">
+                        <div class="form-text text-secondary" style="font-size: 0.8rem;">Formatos: JPG, PNG. (Opcional)</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small mb-1">Chef a cargo</label>
+                        <select class="form-select" name="chefId" id="inputChef">
+                            <option value="">-- Seleccionar Chef --</option>
+                            <option th:each="chef : ${chefsDisponibles}" th:value="${chef.id}" th:text="${chef.nombre}"></option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted small mb-1">Instrucciones de la Receta</label>
+                        <textarea class="form-control" name="descripcionProceso" id="inputDescripcion" rows="3" placeholder="Paso a paso..."></textarea>
+                    </div>
+
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label text-muted small mb-0">Ingredientes requeridos</label>
+                            <button type="button" class="btn btn-sm btn-outline-warning py-0 px-2" onclick="crearNuevoIngrediente()">
+                                <i class="bi bi-plus-lg"></i> Crear Nuevo
+                            </button>
+                        </div>
+
+                        <div class="checkbox-grid mt-2">
+                            <div class="form-check" th:each="ing : ${ingredientesDisponibles}">
+                                <input class="form-check-input" type="checkbox" name="ingredientesIds" th:value="${ing.id}" th:id="'ing_' + ${ing.id}">
+                                <label class="form-check-label" th:for="'ing_' + ${ing.id}" th:text="${ing.descripcion}"></label>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-brand">Guardar Plato y Receta</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function abrirModalFormulario(botonElemento = null) {
+        const modal = new bootstrap.Modal(document.getElementById('modalPlato'));
+        document.querySelectorAll('input[name="ingredientesIds"]').forEach(cb => cb.checked = false);
+
+        if (botonElemento) {
+            document.getElementById('tituloModal').innerText = "Modificar Plato";
+            document.getElementById('inputId').value = botonElemento.getAttribute('data-id');
+            document.getElementById('inputNombre').value = botonElemento.getAttribute('data-nombre');
+            document.getElementById('inputPrecio').value = botonElemento.getAttribute('data-precio');
+        } else {
+            document.getElementById('tituloModal').innerText = "Nuevo Plato Completo";
+            document.getElementById('inputId').value = "";
+            document.getElementById('inputNombre').value = "";
+            document.getElementById('inputPrecio').value = "";
+        }
+        modal.show();
+    }
+
+    function verDetalleReceta(nombre) {
+        fetch(`/api/receta?nombreAlimento=${encodeURIComponent(nombre)}`)
+            .then(response => response.json())
+            .then(data => {
+                Swal.fire({
+                    title: `<h3 style="color: #ff9f1c; margin:0;">${nombre}</h3>`,
+                    html: `
+                            <div style="text-align: left; margin-top: 20px; font-size: 1.1rem;">
+                                <p style="color: #ccc;"><i class="bi bi-person-badge me-2" style="color: #ff9f1c;"></i> <strong>Chef:</strong> ${data.chef}</p>
+                                <p style="color: #ccc;"><i class="bi bi-list-check me-2" style="color: #ff9f1c;"></i> <strong>Preparación:</strong><br> <span style="font-size: 1rem;">${data.descripcion}</span></p>
+                                <p style="color: #ccc;"><i class="bi bi-basket me-2" style="color: #ff9f1c;"></i> <strong>Ingredientes:</strong><br> <span style="font-size: 1rem;">${data.ingredientes}</span></p>
+                            </div>
+                        `,
+                    background: '#1a1a1a',
+                    confirmButtonText: 'Cerrar',
+                    confirmButtonColor: '#ff9f1c'
+                });
+            });
+    }
+
+    // LÓGICA PARA CREAR INGREDIENTE SIN SALIR DE LA PANTALLA
+    function crearNuevoIngrediente() {
+        Swal.fire({
+            title: 'Nuevo Ingrediente',
+            input: 'text',
+            inputLabel: 'Nombre del ingrediente',
+            inputPlaceholder: 'Ej. Salsa Picante',
+            showCancelButton: true,
+            confirmButtonText: '<i class="bi bi-save"></i> Guardar',
+            cancelButtonText: 'Cancelar',
+            background: '#1a1a1a',
+            color: '#fff',
+            confirmButtonColor: '#ff9f1c'
+        }).then((result) => {
+            if (result.isConfirmed && result.value.trim() !== '') {
+                // Creamos un formulario dinámico para enviarlo al backend
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '/ingrediente/guardar';
+
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'descripcion';
+                input.value = result.value.trim();
+
+                form.appendChild(input);
+                document.body.appendChild(form);
+                form.submit();
+            }
+        });
+    }
+</script>
+</body>
+</html>

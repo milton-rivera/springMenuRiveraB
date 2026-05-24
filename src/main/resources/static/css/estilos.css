@@ -1,0 +1,48 @@
+:root {
+    --bg-dark: #0a0a0a;
+    --card-bg: #1a1a1a;
+    --accent-orange: #ff9f1c;
+    --text-white: #000000;
+    --text-gray: #b0b0b0;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-white);
+    font-family: 'Inter', sans-serif;
+    margin: 0;
+}
+
+.hero-banner {
+    background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('/img/hero-bg.jpg');
+    background-size: cover;
+    padding: 60px 20px;
+    text-align: center;
+    border-bottom: 4px solid var(--accent-orange);
+}
+
+.hero-banner h1 { font-size: 3rem; color: var(--text-white); text-transform: uppercase; letter-spacing: 2px; }
+
+.container-menu {
+    max-width: 1000px;
+    margin: 40px auto;
+    background: #000;
+    padding: 40px;
+    border-radius: 15px;
+}
+
+.product-card {
+    background: var(--card-bg);
+    border: 1px solid #333;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    transition: 0.3s;
+}
+
+.product-card:hover { border-color: var(--accent-orange); }
+
+.price { color: var(--accent-orange); font-weight: bold; font-size: 1.2rem; }
+
+/* Tipografía profesional */
+h2 { color: var(--accent-orange); border-bottom: 2px solid var(--accent-orange); display: inline-block; }
