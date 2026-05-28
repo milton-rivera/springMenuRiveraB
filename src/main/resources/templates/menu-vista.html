@@ -14,7 +14,6 @@
         .btn-brand { background-color: #ff9f1c; color: #fff; font-weight: bold; border: none; }
         .btn-brand:hover { background-color: #e88d14; color: #fff; }
 
-        /* Estilos del Carrusel Premium */
         .carousel-item-container { display: flex; justify-content: center; align-items: center; min-height: 400px; }
         .food-card { background-color: #1a1a1a; border: 1px solid #333; border-radius: 15px; overflow: hidden; width: 350px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .food-card img { width: 100%; height: 250px; object-fit: cover; border-bottom: 2px solid #ff9f1c; }
@@ -22,7 +21,6 @@
         .price-tag { color: #ff9f1c; font-size: 1.5rem; font-weight: bold; }
         .carousel-control-prev-icon, .carousel-control-next-icon { background-color: #ff9f1c; border-radius: 50%; padding: 20px; }
 
-        /* Estilo del Modal Dark */
         .modal-content { background-color: #1a1a1a; color: #fff; border: 1px solid #444; }
         .form-control, .form-select { background-color: #2a2a2a; color: #fff; border: 1px solid #444; }
         .form-control:focus, .form-select:focus { background-color: #333; color: #fff; border-color: #ff9f1c; box-shadow: none; }
@@ -115,7 +113,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="modalPlato" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="modalPlato" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header border-0">
@@ -143,7 +141,17 @@
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label text-muted small mb-1">Chef a cargo</label>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label text-muted small mb-0">Chef a cargo</label>
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-warning py-0 px-2 me-1" onclick="crearNuevoChef()">
+                                    <i class="bi bi-plus-lg"></i> Crear
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger py-0 px-2" onclick="eliminarChefSeleccionado()">
+                                    <i class="bi bi-trash"></i> Borrar
+                                </button>
+                            </div>
+                        </div>
                         <select class="form-select" name="chefId" id="inputChef">
                             <option value="">-- Seleccionar Chef --</option>
                             <option th:each="chef : ${chefsDisponibles}" th:value="${chef.id}" th:text="${chef.nombre}"></option>
@@ -163,10 +171,15 @@
                             </button>
                         </div>
 
-                        <div class="checkbox-grid mt-2">
-                            <div class="form-check" th:each="ing : ${ingredientesDisponibles}">
+                        <div class="input-group input-group-sm mb-2 mt-2">
+                            <span class="input-group-text bg-dark text-warning border-secondary"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control" id="buscadorIngredientes" placeholder="Buscar ingrediente..." onkeyup="filtrarIngredientes()">
+                        </div>
+
+                        <div class="checkbox-grid" id="contenedorIngredientes">
+                            <div class="form-check ingrediente-item" th:each="ing : ${ingredientesDisponibles}">
                                 <input class="form-check-input" type="checkbox" name="ingredientesIds" th:value="${ing.id}" th:id="'ing_' + ${ing.id}">
-                                <label class="form-check-label" th:for="'ing_' + ${ing.id}" th:text="${ing.descripcion}"></label>
+                                <label class="form-check-label ingrediente-label" th:for="'ing_' + ${ing.id}" th:text="${ing.descripcion}"></label>
                             </div>
                         </div>
                     </div>
@@ -187,6 +200,11 @@
 <script>
     function abrirModalFormulario(botonElemento = null) {
         const modal = new bootstrap.Modal(document.getElementById('modalPlato'));
+
+        // Limpiamos la búsqueda al abrir
+        const buscador = document.getElementById('buscadorIngredientes');
+        if(buscador) { buscador.value = ''; filtrarIngredientes(); }
+
         document.querySelectorAll('input[name="ingredientesIds"]').forEach(cb => cb.checked = false);
 
         if (botonElemento) {
@@ -199,6 +217,8 @@
             document.getElementById('inputId').value = "";
             document.getElementById('inputNombre').value = "";
             document.getElementById('inputPrecio').value = "";
+            document.getElementById('inputChef').value = "";
+            document.getElementById('inputDescripcion').value = "";
         }
         modal.show();
     }
@@ -223,13 +243,29 @@
             });
     }
 
-    // LÓGICA PARA CREAR INGREDIENTE SIN SALIR DE LA PANTALLA
+    function filtrarIngredientes() {
+        const input = document.getElementById('buscadorIngredientes');
+        const filtro = input.value.toLowerCase();
+        const contenedor = document.getElementById('contenedorIngredientes');
+        const items = contenedor.getElementsByClassName('ingrediente-item');
+
+        for (let i = 0; i < items.length; i++) {
+            const label = items[i].getElementsByClassName('ingrediente-label')[0];
+            const texto = label.textContent || label.innerText;
+            if (texto.toLowerCase().indexOf(filtro) > -1) {
+                items[i].style.display = "";
+            } else {
+                items[i].style.display = "none";
+            }
+        }
+    }
+
     function crearNuevoIngrediente() {
         Swal.fire({
             title: 'Nuevo Ingrediente',
             input: 'text',
-            inputLabel: 'Nombre del ingrediente',
-            inputPlaceholder: 'Ej. Salsa Picante',
+            inputLabel: 'Nombre del ingrediente (Presione ENTER para poder Escribir)',
+            inputPlaceholder: 'Ej. Salsa 123',
             showCancelButton: true,
             confirmButtonText: '<i class="bi bi-save"></i> Guardar',
             cancelButtonText: 'Cancelar',
@@ -238,19 +274,98 @@
             confirmButtonColor: '#ff9f1c'
         }).then((result) => {
             if (result.isConfirmed && result.value.trim() !== '') {
-                // Creamos un formulario dinámico para enviarlo al backend
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = '/ingrediente/guardar';
+                const formData = new URLSearchParams();
+                formData.append('descripcion', result.value.trim());
 
-                const input = document.createElement('input');
-                input.type = 'hidden';
-                input.name = 'descripcion';
-                input.value = result.value.trim();
+                fetch('/api/ingrediente/guardar', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        const container = document.getElementById('contenedorIngredientes');
+                        const div = document.createElement('div');
+                        div.className = 'form-check ingrediente-item';
+                        div.innerHTML = `
+                        <input class="form-check-input" type="checkbox" name="ingredientesIds" value="${data.id}" id="ing_${data.id}" checked>
+                        <label class="form-check-label ingrediente-label" for="ing_${data.id}">${data.descripcion}</label>
+                    `;
+                        container.appendChild(div);
 
-                form.appendChild(input);
-                document.body.appendChild(form);
-                form.submit();
+                        document.getElementById('buscadorIngredientes').value = '';
+                        filtrarIngredientes();
+
+                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Ingrediente guardado', showConfirmButton: false, timer: 2000 });
+                    });
+            }
+        });
+    }
+
+    function crearNuevoChef() {
+        Swal.fire({
+            title: 'Nuevo Chef',
+            input: 'text',
+            inputLabel: 'Nombre completo del chef (Presione Enter para poder Escribir)',
+            inputPlaceholder: 'Ej. Cocinero 123',
+            showCancelButton: true,
+            confirmButtonText: '<i class="bi bi-save"></i> Guardar',
+            cancelButtonText: 'Cancelar',
+            background: '#1a1a1a',
+            color: '#fff',
+            confirmButtonColor: '#ff9f1c'
+        }).then((result) => {
+            if (result.isConfirmed && result.value.trim() !== '') {
+                const formData = new URLSearchParams();
+                formData.append('nombre', result.value.trim());
+
+                fetch('/api/chef/guardar', {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        const select = document.getElementById('inputChef');
+                        const option = document.createElement('option');
+                        option.value = data.id;
+                        option.text = data.nombre;
+                        select.add(option);
+                        select.value = data.id;
+                        Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: 'Chef guardado', showConfirmButton: false, timer: 2000 });
+                    });
+            }
+        });
+    }
+
+    function eliminarChefSeleccionado() {
+        const selectChef = document.getElementById('inputChef');
+        const chefId = selectChef.value;
+        const chefNombre = selectChef.options[selectChef.selectedIndex]?.text;
+
+        if (!chefId) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Atención',
+                text: 'Primero selecciona un chef en el menú desplegable para poder eliminarlo.',
+                background: '#1a1a1a',
+                color: '#fff'
+            });
+            return;
+        }
+
+        Swal.fire({
+            title: `¿Eliminar a ${chefNombre}?`,
+            text: "Cuidado: Si este chef tiene platos asignados, la base de datos podría impedir el borrado.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            background: '#1a1a1a',
+            color: '#fff'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/chef/eliminar/${chefId}`;
             }
         });
     }

@@ -69,21 +69,19 @@ public class MenuWebController {
         alimento.setReceta(receta);
         alimentoRepository.save(alimento);
 
-        // --- NUEVA LÓGICA: GUARDAR LA IMAGEN SUBIDA ---
+        // --- NUEVA LÓGICA: GUARDAR LA IMAGEN SUBIDA EN CARPETA EXTERNA ---
         if (imagen != null && !imagen.isEmpty()) {
             try {
-                // Definimos la ruta donde guardamos las fotos estáticas
-                Path directorioImagenes = Paths.get("src/main/resources/static/img");
-                if (!Files.exists(directorioImagenes)) {
-                    Files.createDirectories(directorioImagenes);
+                // Ahora guardamos en una carpeta "uploads" fuera del empaquetado de Spring
+                java.nio.file.Path directorioImagenes = java.nio.file.Paths.get("uploads");
+                if (!java.nio.file.Files.exists(directorioImagenes)) {
+                    java.nio.file.Files.createDirectories(directorioImagenes);
                 }
 
-                // Guardamos la foto con el nombre del plato (ej: "Empanadas.jpg")
                 String nombreFoto = alimento.getNombre() + ".jpg";
-                Path rutaCompleta = directorioImagenes.resolve(nombreFoto);
+                java.nio.file.Path rutaCompleta = directorioImagenes.resolve(nombreFoto);
 
-                // Copiamos el archivo subido a nuestra carpeta (reemplaza si ya existe)
-                Files.copy(imagen.getInputStream(), rutaCompleta, StandardCopyOption.REPLACE_EXISTING);
+                java.nio.file.Files.copy(imagen.getInputStream(), rutaCompleta, java.nio.file.StandardCopyOption.REPLACE_EXISTING);
 
             } catch (Exception e) {
                 System.out.println("Error al guardar la imagen: " + e.getMessage());
@@ -128,16 +126,44 @@ public class MenuWebController {
         return response;
     }
 
-    // 5. GUARDAR UN NUEVO INGREDIENTE DESDE LA VISTA
-    @PostMapping("/ingrediente/guardar")
-    public String guardarIngrediente(@RequestParam("descripcion") String descripcion) {
-        com.example.springMenuRivera.modelo.Ingrediente nuevoIngrediente = new com.example.springMenuRivera.modelo.Ingrediente();
-        nuevoIngrediente.setDescripcion(descripcion);
+    // 5. GUARDAR INGREDIENTE VÍA AJAX (Sin recargar la página)
+    @PostMapping("/api/ingrediente/guardar")
+    @ResponseBody
+    public java.util.Map<String, Object> guardarIngredienteApi(@RequestParam("descripcion") String descripcion) {
+        com.example.springMenuRivera.modelo.Ingrediente nuevoIng = new com.example.springMenuRivera.modelo.Ingrediente();
+        nuevoIng.setDescripcion(descripcion);
+        nuevoIng = ingredienteRepository.save(nuevoIng); // Lo guardamos y obtenemos su ID generado
 
-        // Si tu clase Ingrediente exige una cantidad, descomenta esta línea y ponle un valor base:
-        // nuevoIngrediente.setCantidad(1);
+        // Devolvemos un JSON con los datos para que JavaScript actualice la vista
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("id", nuevoIng.getId());
+        response.put("descripcion", nuevoIng.getDescripcion());
+        return response;
+    }
 
-        ingredienteRepository.save(nuevoIngrediente);
+    // 6. GUARDAR CHEF VÍA AJAX (Sin recargar la página)
+    @PostMapping("/api/chef/guardar")
+    @ResponseBody
+    public java.util.Map<String, Object> guardarChefApi(@RequestParam("nombre") String nombre) {
+        com.example.springMenuRivera.modelo.Chef nuevoChef = new com.example.springMenuRivera.modelo.Chef();
+        nuevoChef.setNombre(nombre);
+        nuevoChef = chefRepository.save(nuevoChef);
+
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("id", nuevoChef.getId());
+        response.put("nombre", nuevoChef.getNombre());
+        return response;
+    }
+
+    // 7. ELIMINAR UN CHEF EXISTENTE
+    @GetMapping("/chef/eliminar/{id}")
+    public String eliminarChef(@PathVariable("id") Integer id) {
+        try {
+            chefRepository.deleteById(id);
+        } catch (Exception e) {
+            // Si el chef tiene recetas asignadas, Hibernate bloqueará el borrado por seguridad.
+            System.out.println("No se pudo borrar el chef. Probablemente tiene platos asignados.");
+        }
         return "redirect:/menu";
     }
 }
