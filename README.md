@@ -6,7 +6,7 @@ Markdown
 ![MySQL](https://img.shields.io/badge/MySQL-00000F?style=for-the-badge&logo=mysql&logoColor=white)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-563D7C?style=for-the-badge&logo=bootstrap&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-
+## http://localhost:8080/menu
 ## 📖 Resumen del Proyecto
 El **Gestor de Menú - Restaurante ITU** es una aplicación web dinámica orientada a la administración integral de la oferta gastronómica de un restaurante. Permite a los gerentes digitalizar el menú, gestionando de forma centralizada los platos, sus recetas, los ingredientes necesarios y el equipo de chefs a cargo. El sistema garantiza la integridad de los datos y ofrece una interfaz gráfica fluida e intuitiva.
 
