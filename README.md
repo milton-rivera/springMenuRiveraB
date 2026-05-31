@@ -9,6 +9,9 @@ Markdown
 ## http://localhost:8080/menu
 ## 📖 Resumen del Proyecto
 El **Gestor de Menú - Restaurante ITU** es una aplicación web dinámica orientada a la administración integral de la oferta gastronómica de un restaurante. Permite a los gerentes digitalizar el menú, gestionando de forma centralizada los platos, sus recetas, los ingredientes necesarios y el equipo de chefs a cargo. El sistema garantiza la integridad de los datos y ofrece una interfaz gráfica fluida e intuitiva.
+# UML
+<img width="1091" height="823" alt="Restorante_2021" src="https://github.com/user-attachments/assets/d4146d85-b2e9-41eb-878d-886526d33dd0" />
+
 
 ## 🚀 Características Principales
 * **Gestión Completa de Platos (CRUD):** Creación, lectura, actualización y eliminación de alimentos con carga de imágenes dinámicas.
