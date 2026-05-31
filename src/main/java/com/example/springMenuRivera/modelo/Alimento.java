@@ -20,8 +20,9 @@ public class Alimento {
     private String nombre;
     private double precio;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "id_receta")
+
     private Receta receta;
 
     public Alimento() {

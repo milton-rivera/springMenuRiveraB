@@ -1,0 +1,61 @@
+/* FONDO DEL RESTAURANTE  */
+body {
+    color: #fff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+    position: relative;
+    margin: 0;
+    background-color: #000;
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background-image: url('/img/fondo-restaurante.jpg');
+    background-size: cover;
+    background-position: center;
+    opacity: 0.35;
+    filter: blur(1px);
+    z-index: -1;
+}
+
+/* EFECTO CRISTAL PARA LOS COMPONENTES */
+.navbar-admin { background-color: rgba(26, 26, 26, 0.85); border-bottom: 2px solid #a2a6a6; backdrop-filter: blur(5px); }
+.btn-brand { background-color: #a2a6a6; color: #fff; font-weight: bold; border: none; }
+.btn-brand:hover { background-color: #a2a6a6; color: #fff; }
+
+/* CARRUSEL */
+.carousel-item-container { display: flex; justify-content: center; align-items: center; min-height: 550px; }
+.food-card {
+    background-color: rgba(26, 26, 26, 0.9);
+    border: 1px solid #444;
+    border-radius: 20px;
+    overflow: hidden;
+    width: 500px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+}
+.food-card img {
+    width: 100%;
+    height: 350px;
+    object-fit: cover;
+    border-bottom: 3px solid #a2a6a6;
+}
+
+.food-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.food-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 25px 50px rgba(0,0,0,0.9);
+}
+.food-card .card-body { padding: 30px; }
+.price-tag { color: #a2a6a6; font-size: 1.8rem; font-weight: bold; }
+.carousel-control-prev-icon, .carousel-control-next-icon { background-color: rgb(162 166 166); border-radius: 50%; padding: 25px; }
+
+/* Estilos del Modal */
+.modal-content { background-color: rgba(26, 26, 26, 0.95); color: #fff; border: 1px solid #555; backdrop-filter: blur(10px); }
+.form-control, .form-select { background-color: rgba(42, 42, 42, 0.8); color: #fff; border: 1px solid #555; }
+.form-control:focus, .form-select:focus { background-color: #333; color: #fff; border-color: #a2a6a6; box-shadow: none; }
+.checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 150px; overflow-y: auto; padding-right: 10px;}

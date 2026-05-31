@@ -23,14 +23,20 @@ public class MenuWebController {
     @Autowired private IngredienteRepository ingredienteRepository;
     @Autowired private RecetaRepository recetaRepository;
 
-    // 1. MOSTRAR EL PANEL CON TODOS LOS DATOS PARA EL FORMULARIO
+    // 1. MOSTRAR EL PANEL (Actualizado para enviar el ID del Gerente)
     @GetMapping("/menu")
     public String mostrarMenu(Model model) {
         List<Gerente> gerentes = gerenteRepository.findAll();
-        model.addAttribute("nombreGerente", gerentes.isEmpty() ? "Sin Gerente" : gerentes.get(0).getNombre());
-        model.addAttribute("alimentos", alimentoRepository.findAll());
 
-        // Pasamos chefs e ingredientes para llenar los "Select" y "Checkboxes" del formulario
+        if (gerentes.isEmpty()) {
+            model.addAttribute("nombreGerente", "Sin Gerente");
+            model.addAttribute("idGerente", -1);
+        } else {
+            model.addAttribute("nombreGerente", gerentes.get(0).getNombre());
+            model.addAttribute("idGerente", gerentes.get(0).getId());
+        }
+
+        model.addAttribute("alimentos", alimentoRepository.findAll());
         model.addAttribute("chefsDisponibles", chefRepository.findAll());
         model.addAttribute("ingredientesDisponibles", ingredienteRepository.findAll());
 
@@ -58,7 +64,11 @@ public class MenuWebController {
         receta.setDescripcionProceso(descripcionProceso);
 
         // Asignar Chef e Ingredientes
-        if (chefId != null) { chefRepository.findById(chefId).ifPresent(receta::setChef); }
+        if (chefId != null) {
+            chefRepository.findById(chefId).ifPresent(receta::setChef);
+        } else {
+            receta.setChef(null); // ¡Esto lo desasigna formalmente!
+        }
         if (ingredientesIds != null && !ingredientesIds.isEmpty()) {
             receta.setIngredientes(ingredienteRepository.findAllById(ingredientesIds));
         } else {
@@ -155,15 +165,56 @@ public class MenuWebController {
         return response;
     }
 
-    // 7. ELIMINAR UN CHEF EXISTENTE
-    @GetMapping("/chef/eliminar/{id}")
-    public String eliminarChef(@PathVariable("id") Integer id) {
+    // 7. ELIMINAR UN CHEF EXISTENTE VÍA AJAX
+    @PostMapping("/api/chef/eliminar")
+    @ResponseBody
+    public java.util.Map<String, Object> eliminarChefApi(@RequestParam("id") Integer id) {
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
         try {
             chefRepository.deleteById(id);
+            response.put("success", true);
         } catch (Exception e) {
-            // Si el chef tiene recetas asignadas, Hibernate bloqueará el borrado por seguridad.
-            System.out.println("No se pudo borrar el chef. Probablemente tiene platos asignados.");
+            // Si entra aquí, es porque MySQL bloqueó el borrado (el chef tiene platos)
+            response.put("success", false);
+            response.put("message", "No se puede eliminar este chef porque tiene platos asignados en el menú. Reasigna sus platos primero.");
         }
-        return "redirect:/menu";
+        return response;
+    }
+    // 8. ACTUALIZAR INGREDIENTE VÍA AJAX (Sin recargar la página)
+    @PostMapping("/api/ingrediente/actualizar")
+    @ResponseBody
+    public java.util.Map<String, Object> actualizarIngredienteApi(@RequestParam("id") Integer id, @RequestParam("descripcion") String descripcion) {
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        try {
+            // Buscamos el ingrediente existente, le cambiamos el nombre y lo guardamos
+            com.example.springMenuRivera.modelo.Ingrediente ing = ingredienteRepository.findById(id).orElseThrow();
+            ing.setDescripcion(descripcion);
+            ingredienteRepository.save(ing);
+
+            response.put("success", true);
+            response.put("id", ing.getId());
+            response.put("descripcion", ing.getDescripcion());
+        } catch (Exception e) {
+            response.put("success", false);
+        }
+        return response;
+    }
+
+    // 9. ACTUALIZAR GERENTE VÍA AJAX
+    @PostMapping("/api/gerente/actualizar")
+    @ResponseBody
+    public java.util.Map<String, Object> actualizarGerenteApi(@RequestParam("id") Integer id, @RequestParam("nombre") String nombre) {
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        try {
+            com.example.springMenuRivera.modelo.Gerente gerente = gerenteRepository.findById(id).orElseThrow();
+            gerente.setNombre(nombre);
+            gerenteRepository.save(gerente);
+
+            response.put("success", true);
+            response.put("nombre", gerente.getNombre());
+        } catch (Exception e) {
+            response.put("success", false);
+        }
+        return response;
     }
 }
