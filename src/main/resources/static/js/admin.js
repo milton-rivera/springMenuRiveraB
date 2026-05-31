@@ -226,7 +226,7 @@ function eliminarChefSeleccionado() {
     });
 }
 
-// NUEVA FUNCIÓN: Modificar al Gerente Principal
+// Modificar al Gerente
 function modificarGerente(id, nombreActual) {
     Swal.fire({
         title: 'Modificar Perfil',
@@ -267,4 +267,34 @@ function modificarGerente(id, nombreActual) {
                 });
         }
     });
+}
+
+// Validar el formulario
+function validarFormularioPlato(event) {
+    // 1. Validar Precio (Que no sea negativo o cero)
+    const precio = parseFloat(document.getElementById('inputPrecio').value);
+    if (precio <= 0) {
+        event.preventDefault();
+        Swal.fire({ icon: 'warning', title: 'Precio Inválido', text: 'El precio del plato debe ser mayor a $0.', background: '#1a1a1a', color: '#fff' });
+        return false;
+    }
+
+    // 2. Validar Chef (Que haya seleccionado uno)
+    const chef = document.getElementById('inputChef').value;
+    if (!chef || chef === "") {
+        event.preventDefault();
+        Swal.fire({ icon: 'warning', title: 'Falta el Chef', text: 'Por favor, asigna un chef a este plato.', background: '#1a1a1a', color: '#fff' });
+        return false;
+    }
+
+    // 3. Validar Ingredientes (Mínimo 1)
+    const ingredientesSeleccionados = document.querySelectorAll('input[name="ingredientesIds"]:checked');
+    if (ingredientesSeleccionados.length === 0) {
+        event.preventDefault();
+        Swal.fire({ icon: 'warning', title: 'Sin Ingredientes', text: 'Debes seleccionar al menos un ingrediente para la receta.', background: '#1a1a1a', color: '#fff' });
+        return false;
+    }
+
+
+    return true;
 }

@@ -23,7 +23,7 @@ public class MenuWebController {
     @Autowired private IngredienteRepository ingredienteRepository;
     @Autowired private RecetaRepository recetaRepository;
 
-    // 1. MOSTRAR EL PANEL (Actualizado para enviar el ID del Gerente)
+    // MOSTRAR PANEL
     @GetMapping("/menu")
     public String mostrarMenu(Model model) {
         List<Gerente> gerentes = gerenteRepository.findAll();
@@ -43,7 +43,7 @@ public class MenuWebController {
         return "menu-vista";
     }
 
-    // 2. GUARDAR O ACTUALIZAR (AHORA SOPORTA SUBIDA DE IMÁGENES)
+    // 2. GUARDAR O ACTUALIZAR
     @PostMapping("/menu/guardar")
     public String guardarAlimento(@RequestParam(value = "id", required = false) Integer id,
                                   @RequestParam("nombre") String nombre,
@@ -51,7 +51,7 @@ public class MenuWebController {
                                   @RequestParam(value = "chefId", required = false) Integer chefId,
                                   @RequestParam(value = "descripcionProceso", required = false) String descripcionProceso,
                                   @RequestParam(value = "ingredientesIds", required = false) List<Integer> ingredientesIds,
-                                  @RequestParam(value = "imagen", required = false) MultipartFile imagen) { // <-- NUEVO PARÁMETRO
+                                  @RequestParam(value = "imagen", required = false) MultipartFile imagen) {
 
         Alimento alimento = (id != null) ? alimentoRepository.findById(id).orElse(new Alimento()) : new Alimento();
         alimento.setNombre(nombre);
@@ -79,10 +79,10 @@ public class MenuWebController {
         alimento.setReceta(receta);
         alimentoRepository.save(alimento);
 
-        // --- NUEVA LÓGICA: GUARDAR LA IMAGEN SUBIDA EN CARPETA EXTERNA ---
+        // GUARDAR LA IMAGEN SUBIDA EN CARPETA EXTERNA "uploads"
         if (imagen != null && !imagen.isEmpty()) {
             try {
-                // Ahora guardamos en una carpeta "uploads" fuera del empaquetado de Spring
+
                 java.nio.file.Path directorioImagenes = java.nio.file.Paths.get("uploads");
                 if (!java.nio.file.Files.exists(directorioImagenes)) {
                     java.nio.file.Files.createDirectories(directorioImagenes);
@@ -101,14 +101,14 @@ public class MenuWebController {
         return "redirect:/menu";
     }
 
-    // 3. ELIMINAR UN PLATO
+    //ELIMINAR UN PLATO
     @GetMapping("/menu/eliminar/{id}")
     public String eliminarAlimento(@PathVariable("id") Integer id) {
         alimentoRepository.deleteById(id);
         return "redirect:/menu";
     }
 
-    // 4. API PARA VER DETALLES (SWEETALERT2)
+    // 4.VER DETALLES (SWEETALERT2)
     @GetMapping("/api/receta")
     @ResponseBody
     public java.util.Map<String, String> obtenerDetalleReceta(@RequestParam String nombreAlimento) {
@@ -136,22 +136,22 @@ public class MenuWebController {
         return response;
     }
 
-    // 5. GUARDAR INGREDIENTE VÍA AJAX (Sin recargar la página)
+    // 5. GUARDAR INGREDIENTE
     @PostMapping("/api/ingrediente/guardar")
     @ResponseBody
     public java.util.Map<String, Object> guardarIngredienteApi(@RequestParam("descripcion") String descripcion) {
         com.example.springMenuRivera.modelo.Ingrediente nuevoIng = new com.example.springMenuRivera.modelo.Ingrediente();
         nuevoIng.setDescripcion(descripcion);
-        nuevoIng = ingredienteRepository.save(nuevoIng); // Lo guardamos y obtenemos su ID generado
+        nuevoIng = ingredienteRepository.save(nuevoIng);
 
-        // Devolvemos un JSON con los datos para que JavaScript actualice la vista
+
         java.util.Map<String, Object> response = new java.util.HashMap<>();
         response.put("id", nuevoIng.getId());
         response.put("descripcion", nuevoIng.getDescripcion());
         return response;
     }
 
-    // 6. GUARDAR CHEF VÍA AJAX (Sin recargar la página)
+    // 6. GUARDAR CHEF
     @PostMapping("/api/chef/guardar")
     @ResponseBody
     public java.util.Map<String, Object> guardarChefApi(@RequestParam("nombre") String nombre) {
@@ -165,7 +165,7 @@ public class MenuWebController {
         return response;
     }
 
-    // 7. ELIMINAR UN CHEF EXISTENTE VÍA AJAX
+    // 7. ELIMINAR UN CHEF EXISTENTE
     @PostMapping("/api/chef/eliminar")
     @ResponseBody
     public java.util.Map<String, Object> eliminarChefApi(@RequestParam("id") Integer id) {
@@ -180,13 +180,13 @@ public class MenuWebController {
         }
         return response;
     }
-    // 8. ACTUALIZAR INGREDIENTE VÍA AJAX (Sin recargar la página)
+    // 8. ACTUALIZAR INGREDIENTE
     @PostMapping("/api/ingrediente/actualizar")
     @ResponseBody
     public java.util.Map<String, Object> actualizarIngredienteApi(@RequestParam("id") Integer id, @RequestParam("descripcion") String descripcion) {
         java.util.Map<String, Object> response = new java.util.HashMap<>();
         try {
-            // Buscamos el ingrediente existente, le cambiamos el nombre y lo guardamos
+
             com.example.springMenuRivera.modelo.Ingrediente ing = ingredienteRepository.findById(id).orElseThrow();
             ing.setDescripcion(descripcion);
             ingredienteRepository.save(ing);
@@ -200,7 +200,7 @@ public class MenuWebController {
         return response;
     }
 
-    // 9. ACTUALIZAR GERENTE VÍA AJAX
+    // 9. ACTUALIZAR GERENTE
     @PostMapping("/api/gerente/actualizar")
     @ResponseBody
     public java.util.Map<String, Object> actualizarGerenteApi(@RequestParam("id") Integer id, @RequestParam("nombre") String nombre) {

@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface IngredienteRepository extends JpaRepository<Ingrediente, Integer> {
-    // Acá también, vacío. Ya tenés todo lo necesario para traer los alimentos.
+
 }

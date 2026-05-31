@@ -118,7 +118,7 @@
                 <h4 class="modal-title fw-bold text-warning" id="tituloModal">Nuevo Plato Completo</h4>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <form th:action="@{/menu/guardar}" method="POST" enctype="multipart/form-data">
+            <form id="formPlato" th:action="@{/menu/guardar}" method="POST" enctype="multipart/form-data" onsubmit="return validarFormularioPlato(event)">
                 <div class="modal-body text-start pt-4">
                     <input type="hidden" id="inputId" name="id">
 
