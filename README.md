@@ -79,7 +79,7 @@ Abre tu gestor de MySQL.
 
 Crea una base de datos vacía llamada restaurante_db.
 
-Importa el archivo restaurante_db.sql (ubicado en la raíz del proyecto) para generar las tablas y poblar los datos maestros.
+⚙️⚙️⚙️Importa el archivo restaurante_db.sql (ubicado en la raíz del proyecto) para generar las tablas y poblar los datos maestros.⚙️⚙️⚙️
 
 Configurar Credenciales:
 
@@ -98,9 +98,5 @@ Acceder al Sistema:
 Abre tu navegador y dirígete a http://localhost:8080.
 
 💡 Sobre el Proyecto
-Este sistema fue diseñado con el objetivo de crear soluciones robustas que unan los procesos operativos físicos (la cocina, el inventario, la preparación) con herramientas de software eficientes y escalables.
+Este sistema fue diseñado con el objetivo de crear soluciones robustas que unan los procesos operativos físicos (la cocina, el inventario, la preparación).
 
-Desarrollado en Mendoza, Argentina, con estándares de calidad de Software Factory. 🚀
-
-
-*(Nota: En la sección "Instrucciones de Instalación", recuerda cambiar `TU_USUARIO/TU_REPOSITORIO` por el enlace real de tu GitHub).*
